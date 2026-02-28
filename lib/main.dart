@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'app.dart';
@@ -11,6 +13,9 @@ import 'utils/storage_helper.dart';
 /// main()은 초기화와 실행만 담당하고, 앱 설정(테마, 라우팅)은 App 위젯에 위임한다.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    usePathUrlStrategy(); // /#/game → /game (hash 제거, path 기반 URL)
+  }
   await EasyLocalization.ensureInitialized();
   await StorageHelper.init();
   await SoundManager.preload();

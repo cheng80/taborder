@@ -14,7 +14,7 @@ import 'components/grid_bg.dart';
 import 'components/space_bg.dart';
 
 /// 1 to 50 게임의 메인 클래스.
-/// 5×5 그리드에 1~25를 배치하고, 정답을 맞추면 26~50이 순차 등장한다.
+/// 5×5 그리드에 1~25를 셔플해 배치하고, 정답을 맞추면 26~50도 셔플된 순서대로 등장한다.
 class OneToFiftyGame extends FlameGame with TapCallbacks {
   /// 게임 모드: 0 = 숫자(1~50), 1 = 알파벳(A~Z)
   final int gameMode;
@@ -377,7 +377,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
         _hud?.updateHint(labels[currentNumber - 1]);
 
         cube.animateCorrect(() {
-          // 2차 테이블에서 순서대로 다음 숫자/알파벳 교체.
+          // 2차 테이블(shuffledSecond)에서 셔플된 순서대로 다음 숫자/알파벳 교체.
           if (_nextSecondIndex < shuffledSecond.length) {
             final nextId = shuffledSecond[_nextSecondIndex];
             _nextSecondIndex++;
