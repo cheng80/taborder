@@ -63,11 +63,15 @@ class SoundManager {
     _currentBgm = null;
   }
 
-  /// BGM 일시정지. 게임 일시정지·음소거 시 사용.
-  static void pauseBgm() => FlameAudio.bgm.pause();
+  /// BGM 일시정지. [onlyIfCurrent]가 지정되면 현재 BGM과 일치할 때만 적용.
+  static void pauseBgm({String? onlyIfCurrent}) {
+    if (onlyIfCurrent != null && _currentBgm != onlyIfCurrent) return;
+    FlameAudio.bgm.pause();
+  }
 
-  /// BGM 재개. 게임 재개·음소거 해제 시 호출.
-  static void resumeBgm() {
+  /// BGM 재개. [onlyIfCurrent]가 지정되면 현재 BGM과 일치할 때만 적용.
+  static void resumeBgm({String? onlyIfCurrent}) {
+    if (onlyIfCurrent != null && _currentBgm != onlyIfCurrent) return;
     if (GameSettings.bgmMuted) return;
     if (_currentBgm == null) return;
     if (FlameAudio.bgm.isPlaying) return;

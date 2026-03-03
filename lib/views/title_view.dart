@@ -37,10 +37,10 @@ class _TitleViewState extends State<TitleView>
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
       case AppLifecycleState.detached:
-        SoundManager.pauseBgm();
+        SoundManager.pauseBgm(onlyIfCurrent: AssetPaths.bgmMenu);
         break;
       case AppLifecycleState.resumed:
-        SoundManager.resumeBgm();
+        SoundManager.resumeBgm(onlyIfCurrent: AssetPaths.bgmMenu);
         break;
       case AppLifecycleState.inactive:
         break;

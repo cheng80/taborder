@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -110,22 +109,30 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
     return null;
   }
 
-  /// 백그라운드 진입 시 일시정지: 엔진 정지, BGM 정지, PauseMenu 표시.
-  /// 복귀 시 자동 재개하지 않고 사용자가 "계속하기"를 눌러야 재개.
+  /// 백그라운드 진입 시: 게임 BGM만 일시정지. 플레이 중이면 PauseMenu 표시.
+  /// detached는 GameWidget 제거(메뉴로 나가기) 시에도 호출되므로 BGM pause 제외.
+  /// 복귀 시: PauseMenu면 사용자가 "계속하기"로 재개, Clear 팝업이면 BGM 자동 재개.
   @override
   void lifecycleStateChange(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
       case AppLifecycleState.inactive:
-        // 자동 재개하지 않음. PauseMenu가 떠 있으면 사용자가 "계속하기"로 재개.
+        // PauseMenu: 사용자가 "계속하기"로 재개. Clear 팝업: BGM 자동 재개.
+        if (overlays.isActive('Clear')) {
+          SoundManager.resumeBgm(onlyIfCurrent: AssetPaths.bgmMain);
+        }
+        return;
+      case AppLifecycleState.detached:
+        // 메뉴로 나갈 때 GameWidget dispose 시 호출됨. pauseBgm 호출 시 메뉴 BGM이 멈춤.
+        super.lifecycleStateChange(state);
         return;
       case AppLifecycleState.paused:
-      case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
         super.lifecycleStateChange(state);
+        // 라우트 전환 경쟁 상태에서 메뉴 BGM까지 멈추지 않도록 game BGM일 때만 pause.
+        SoundManager.pauseBgm(onlyIfCurrent: AssetPaths.bgmMain);
         if (isPlaying) {
           isPlaying = false;
-          SoundManager.pauseBgm();
           overlays.add('PauseMenu');
         }
         break;
@@ -203,6 +210,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
   void pauseGame() {
     if (!isPlaying) return;
     isPlaying = false;
+    // 사용자가 직접 일시정지를 누른 경우에는 현재 BGM을 항상 멈춘다.
     SoundManager.pauseBgm();
     pauseEngine();
     overlays.remove('PauseButton');

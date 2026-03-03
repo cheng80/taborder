@@ -463,7 +463,7 @@ class _PauseMenuOverlayState extends State<_PauseMenuOverlay> {
                   onPressed: () {
                     SoundManager.unlockForWeb();
                     SoundManager.playSfx(AssetPaths.sfxBtnSnd);
-                    SoundManager.resumeBgm();
+                    SoundManager.resumeBgm(onlyIfCurrent: AssetPaths.bgmMain);
                     widget.game.resumeEngine();
                     widget.game.overlays.remove('PauseMenu');
                     widget.game.overlays.add('PauseButton');
