@@ -27,5 +27,7 @@
   "langEn": "English",
   "langJa": "日本語",
   "langZhCN": "簡體中文",
-  "langZhTW": "繁體中文"
+  "langZhTW": "繁體中文",
+  "rateApp": "評價應用",
+  "rateAppAfterRelease": "發佈後可用"
 }

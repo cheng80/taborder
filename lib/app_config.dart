@@ -3,6 +3,9 @@
 class AppConfig {
   AppConfig._();
 
+  /// iOS/MacOS: App Store Connect > General > App Information > Apple ID. 출시 시 설정.
+  static const String appStoreId = '';
+
   static const String appTitle = '순서대로 TapTap';
   static const String gameTitle = '순서대로';
   static const String gameTitleSub = 'TapTap';
@@ -19,7 +22,13 @@ class StorageKeys {
   static const String sfxMuted = 'sfx_muted';
   static const String keepScreenOn = 'keep_screen_on';
   static const String bestScorePrefix = 'best_score_mode_';
+  static const String firstLaunchDate = 'first_launch_date';
+  static const String reviewRequestedAfterFirstClear = 'review_requested_after_first_clear';
+  static const String reviewRequestedOnTitle = 'review_requested_on_title';
 }
+
+/// 인앱 리뷰: TitleView에서 일정 기간(일) 경과 후 requestReview 호출.
+const int reviewDaysAfterFirstLaunch = 3;
 
 /// GoRouter에서 사용할 경로 상수.
 /// 라우트 경로를 한곳에서 관리하여 오타를 방지한다.

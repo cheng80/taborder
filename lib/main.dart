@@ -7,6 +7,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'app.dart';
 import 'resources/sound_manager.dart';
 import 'services/game_settings.dart';
+import 'services/in_app_review_service.dart';
 import 'utils/storage_helper.dart';
 
 /// 앱 진입점.
@@ -18,6 +19,7 @@ void main() async {
   }
   await EasyLocalization.ensureInitialized();
   await StorageHelper.init();
+  await InAppReviewService.saveFirstLaunchDateIfNeeded();
   await SoundManager.preload();
   _applyKeepScreenOn();
   runApp(

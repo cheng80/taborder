@@ -10,6 +10,7 @@ import '../game/one_to_fifty_game.dart';
 import '../resources/asset_paths.dart';
 import '../resources/sound_manager.dart';
 import '../services/game_settings.dart';
+import '../services/in_app_review_service.dart';
 
 /// 게임 화면. OneToFiftyGame을 마운트하고 오버레이를 관리한다.
 class GameView extends StatefulWidget {
@@ -131,7 +132,33 @@ class _GameViewState extends State<GameView> {
   }
 
   /// 게임 클리어 오버레이: Clear! 텍스트, 결과 시간, 다시하기·나가기 버튼.
+  /// 첫 클리어 시 인앱 리뷰 팝업 요청.
   Widget _buildClearScreen(BuildContext context, OneToFiftyGame game) {
+    return _ClearScreenOverlay(game: game);
+  }
+}
+
+/// 클리어 화면. 첫 표시 시 2초 후 인앱 리뷰 요청.
+class _ClearScreenOverlay extends StatefulWidget {
+  const _ClearScreenOverlay({required this.game});
+  final OneToFiftyGame game;
+
+  @override
+  State<_ClearScreenOverlay> createState() => _ClearScreenOverlayState();
+}
+
+class _ClearScreenOverlayState extends State<_ClearScreenOverlay> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) InAppReviewService.maybeRequestReviewAfterFirstClear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final game = widget.game;
     return Center(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 24),

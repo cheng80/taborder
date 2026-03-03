@@ -5,6 +5,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../resources/asset_paths.dart';
 import '../resources/sound_manager.dart';
 import '../services/game_settings.dart';
+import '../services/in_app_review_service.dart';
 
 /// 설정 화면. 볼륨, 음소거, 화면 꺼짐 방지 설정.
 class SettingView extends StatefulWidget {
@@ -128,6 +129,27 @@ class _SettingViewState extends State<SettingView> {
                   _sfxMuted = v;
                   GameSettings.sfxMuted = v;
                 });
+              },
+            ),
+            Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
+            _SectionTitle(icon: Icons.star, title: context.tr('rateApp')),
+            ListTile(
+              leading: const Icon(Icons.star_border, color: Colors.amber),
+              title: Text(
+                context.tr('rateApp'),
+                style: const TextStyle(
+                  fontFamily: AssetPaths.fontAngduIpsul140,
+                  fontSize: 16,
+                ),
+              ),
+              onTap: () async {
+                final result = await InAppReviewService.openStoreListing();
+                if (!context.mounted) return;
+                if (result == false) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(context.tr('rateAppAfterRelease'))),
+                  );
+                }
               },
             ),
             Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),

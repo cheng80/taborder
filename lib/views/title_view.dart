@@ -3,10 +3,12 @@ import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../app_config.dart';
 import '../resources/asset_paths.dart';
 import '../resources/sound_manager.dart';
+import '../services/in_app_review_service.dart';
 
 /// 타이틀 화면. 우주 배경 위에 제목과 모드 선택 버튼을 표시한다.
 class TitleView extends StatefulWidget {
@@ -23,6 +25,9 @@ class _TitleViewState extends State<TitleView>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     SoundManager.playBgm(AssetPaths.bgmMenu);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) InAppReviewService.maybeRequestReviewOnTitleIfEligible();
+    });
   }
 
   @override
@@ -54,6 +59,35 @@ class _TitleViewState extends State<TitleView>
       body: Stack(
         children: [
           const _StarryBackground(),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    final v = snapshot.data;
+                    final text = v != null
+                        ? 'Ver ${v.version}+${v.buildNumber}'
+                        : 'Ver';
+                    return Center(
+                      child: Text(
+                        text,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 12,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
           SafeArea(
             child: Center(
               child: Column(
