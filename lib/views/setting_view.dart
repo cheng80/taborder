@@ -57,169 +57,172 @@ class _SettingViewState extends State<SettingView> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          spacing: 8,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _SectionTitle(
-              icon: Icons.phone_android,
-              title: context.tr('sectionScreen'),
-            ),
-            _MuteSwitch(
-              label: context.tr('keepScreenOn'),
-              value: _keepScreenOn,
-              onChanged: (v) {
-                setState(() {
-                  _keepScreenOn = v;
-                  GameSettings.keepScreenOn = v;
-                  _applyKeepScreenOn();
-                });
-              },
-            ),
-            Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
-            _SectionTitle(
-              icon: Icons.volume_up,
-              title: context.tr('sectionSound'),
-            ),
-            _VolumeSlider(
-              label: context.tr('bgmVolume'),
-              value: _bgmVolume,
-              enabled: !_bgmMuted,
-              onChanged: (v) {
-                setState(() {
-                  _bgmVolume = v;
-                  GameSettings.bgmVolume = v;
-                  SoundManager.applyBgmVolume();
-                });
-              },
-            ),
-            _MuteSwitch(
-              label: context.tr('bgm'),
-              value: _bgmMuted,
-              onChanged: (v) {
-                setState(() {
-                  _bgmMuted = v;
-                  GameSettings.bgmMuted = v;
-                  if (v) {
-                    SoundManager.pauseBgm();
-                  } else {
-                    SoundManager.playBgmIfUnmuted();
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            spacing: 8,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _SectionTitle(
+                icon: Icons.phone_android,
+                title: context.tr('sectionScreen'),
+              ),
+              _MuteSwitch(
+                label: context.tr('keepScreenOn'),
+                value: _keepScreenOn,
+                onChanged: (v) {
+                  setState(() {
+                    _keepScreenOn = v;
+                    GameSettings.keepScreenOn = v;
+                    _applyKeepScreenOn();
+                  });
+                },
+              ),
+              Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
+              _SectionTitle(
+                icon: Icons.volume_up,
+                title: context.tr('sectionSound'),
+              ),
+              _VolumeSlider(
+                label: context.tr('bgmVolume'),
+                value: _bgmVolume,
+                enabled: !_bgmMuted,
+                onChanged: (v) {
+                  setState(() {
+                    _bgmVolume = v;
+                    GameSettings.bgmVolume = v;
+                    SoundManager.applyBgmVolume();
+                  });
+                },
+              ),
+              _MuteSwitch(
+                label: context.tr('bgm'),
+                value: _bgmMuted,
+                onChanged: (v) {
+                  setState(() {
+                    _bgmMuted = v;
+                    GameSettings.bgmMuted = v;
+                    if (v) {
+                      SoundManager.pauseBgm();
+                    } else {
+                      SoundManager.playBgmIfUnmuted();
+                    }
+                  });
+                },
+              ),
+              _VolumeSlider(
+                label: context.tr('sfxVolume'),
+                value: _sfxVolume,
+                enabled: !_sfxMuted,
+                onChanged: (v) {
+                  setState(() {
+                    _sfxVolume = v;
+                    GameSettings.sfxVolume = v;
+                  });
+                },
+              ),
+              _MuteSwitch(
+                label: context.tr('sfx'),
+                value: _sfxMuted,
+                onChanged: (v) {
+                  setState(() {
+                    _sfxMuted = v;
+                    GameSettings.sfxMuted = v;
+                  });
+                },
+              ),
+              Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
+              _SectionTitle(icon: Icons.star, title: context.tr('rateApp')),
+              ListTile(
+                leading: const Icon(Icons.star_border, color: Colors.amber),
+                title: Text(
+                  context.tr('rateApp'),
+                  style: const TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    fontSize: 16,
+                  ),
+                ),
+                onTap: () async {
+                  final result = await InAppReviewService.openStoreListing();
+                  if (!context.mounted) return;
+                  if (result == false) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(context.tr('rateAppAfterRelease'))),
+                    );
                   }
-                });
-              },
-            ),
-            _VolumeSlider(
-              label: context.tr('sfxVolume'),
-              value: _sfxVolume,
-              enabled: !_sfxMuted,
-              onChanged: (v) {
-                setState(() {
-                  _sfxVolume = v;
-                  GameSettings.sfxVolume = v;
-                });
-              },
-            ),
-            _MuteSwitch(
-              label: context.tr('sfx'),
-              value: _sfxMuted,
-              onChanged: (v) {
-                setState(() {
-                  _sfxMuted = v;
-                  GameSettings.sfxMuted = v;
-                });
-              },
-            ),
-            Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
-            _SectionTitle(icon: Icons.star, title: context.tr('rateApp')),
-            ListTile(
-              leading: const Icon(Icons.star_border, color: Colors.amber),
-              title: Text(
-                context.tr('rateApp'),
-                style: const TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  fontSize: 16,
-                ),
+                },
               ),
-              onTap: () async {
-                final result = await InAppReviewService.openStoreListing();
-                if (!context.mounted) return;
-                if (result == false) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.tr('rateAppAfterRelease'))),
-                  );
-                }
-              },
-            ),
-            Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
-            _SectionTitle(icon: Icons.public, title: context.tr('language')),
-            ListTile(
-              title: Text(
-                context.tr('langKo'),
-                style: const TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  fontSize: 16,
+              Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
+              _SectionTitle(icon: Icons.public, title: context.tr('language')),
+              ListTile(
+                title: Text(
+                  context.tr('langKo'),
+                  style: const TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    fontSize: 16,
+                  ),
                 ),
+                trailing: context.locale == const Locale('ko')
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () => context.setLocale(const Locale('ko')),
               ),
-              trailing: context.locale == const Locale('ko')
-                  ? const Icon(Icons.check, color: Colors.green)
-                  : null,
-              onTap: () => context.setLocale(const Locale('ko')),
-            ),
-            ListTile(
-              title: Text(
-                context.tr('langEn'),
-                style: const TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  fontSize: 16,
+              ListTile(
+                title: Text(
+                  context.tr('langEn'),
+                  style: const TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    fontSize: 16,
+                  ),
                 ),
+                trailing: context.locale == const Locale('en')
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () => context.setLocale(const Locale('en')),
               ),
-              trailing: context.locale == const Locale('en')
-                  ? const Icon(Icons.check, color: Colors.green)
-                  : null,
-              onTap: () => context.setLocale(const Locale('en')),
-            ),
-            ListTile(
-              title: Text(
-                context.tr('langJa'),
-                style: const TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  fontSize: 16,
+              ListTile(
+                title: Text(
+                  context.tr('langJa'),
+                  style: const TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    fontSize: 16,
+                  ),
                 ),
+                trailing: context.locale == const Locale('ja')
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () => context.setLocale(const Locale('ja')),
               ),
-              trailing: context.locale == const Locale('ja')
-                  ? const Icon(Icons.check, color: Colors.green)
-                  : null,
-              onTap: () => context.setLocale(const Locale('ja')),
-            ),
-            ListTile(
-              title: Text(
-                context.tr('langZhCN'),
-                style: const TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  fontSize: 16,
+              ListTile(
+                title: Text(
+                  context.tr('langZhCN'),
+                  style: const TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    fontSize: 16,
+                  ),
                 ),
+                trailing: context.locale == const Locale('zh', 'CN')
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () => context.setLocale(const Locale('zh', 'CN')),
               ),
-              trailing: context.locale == const Locale('zh', 'CN')
-                  ? const Icon(Icons.check, color: Colors.green)
-                  : null,
-              onTap: () => context.setLocale(const Locale('zh', 'CN')),
-            ),
-            ListTile(
-              title: Text(
-                context.tr('langZhTW'),
-                style: const TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  fontSize: 16,
+              ListTile(
+                title: Text(
+                  context.tr('langZhTW'),
+                  style: const TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    fontSize: 16,
+                  ),
                 ),
+                trailing: context.locale == const Locale('zh', 'TW')
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () => context.setLocale(const Locale('zh', 'TW')),
               ),
-              trailing: context.locale == const Locale('zh', 'TW')
-                  ? const Icon(Icons.check, color: Colors.green)
-                  : null,
-              onTap: () => context.setLocale(const Locale('zh', 'TW')),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

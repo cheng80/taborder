@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flame/game.dart';
@@ -33,15 +35,17 @@ class _GameViewState extends State<GameView> {
   /// 모바일 기준 크기. 웹에서는 이 비율로 중앙 배치.
   static const double _mobileRefW = 390.0;
   static const double _mobileRefH = 750.0;
+  static const double _webMinScale = 0.83;
+  static const double _webMaxScale = 1.5;
 
   /// GameWidget에 OneToFiftyGame 마운트. 웹은 모바일 비율로 중앙 배치.
   @override
   Widget build(BuildContext context) {
-    final safeTop = MediaQuery.of(context).padding.top;
+    final mediaPadding = MediaQuery.of(context).padding;
     final gameWidget = GameWidget<OneToFiftyGame>.controlled(
       gameFactory: () => OneToFiftyGame(
         gameMode: widget.gameMode,
-        safeAreaTop: kIsWeb ? 0 : safeTop,
+        safeAreaPadding: kIsWeb ? EdgeInsets.zero : mediaPadding,
       ),
       overlayBuilderMap: {
         'Countdown': _buildCountdown,
@@ -59,14 +63,34 @@ class _GameViewState extends State<GameView> {
             Center(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final scale = (constraints.maxWidth / _mobileRefW)
-                      .clamp(0.0, constraints.maxHeight / _mobileRefH);
+                  final fittedScale = min(
+                    constraints.maxWidth / _mobileRefW,
+                    constraints.maxHeight / _mobileRefH,
+                  );
+                  final scale = fittedScale < _webMinScale
+                      ? fittedScale
+                      : fittedScale.clamp(_webMinScale, _webMaxScale);
                   final gameW = _mobileRefW * scale;
                   final gameH = _mobileRefH * scale;
                   return SizedBox(
                     width: gameW,
                     height: gameH,
-                    child: gameWidget,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 24,
+                            spreadRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: gameWidget,
+                      ),
+                    ),
                   );
                 },
               ),

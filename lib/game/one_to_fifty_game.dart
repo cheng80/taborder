@@ -19,10 +19,10 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
   /// 게임 모드: 0 = 숫자(1~50), 1 = 알파벳(A~Z)
   final int gameMode;
 
-  /// 상단 SafeArea 패딩 (노치/다이나믹 아일랜드 높이)
-  final double safeAreaTop;
+  /// 게임 요소 배치에만 적용하는 SafeArea 패딩.
+  final EdgeInsets safeAreaPadding;
 
-  OneToFiftyGame({this.gameMode = 0, this.safeAreaTop = 0});
+  OneToFiftyGame({this.gameMode = 0, this.safeAreaPadding = EdgeInsets.zero});
 
   static const int colNum = 5;
   static const int rowNum = 5;
@@ -147,7 +147,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
 
     camera.backdrop.add(SpaceBg());
 
-    _hud = GameHud(safeAreaTop: safeAreaTop);
+    _hud = GameHud();
     camera.viewport.add(_hud!);
 
     _prepareGrid();
@@ -240,20 +240,32 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
   /// 힌트 원 반지름. HUD와 공유.
   double get hintR => _hintR;
 
+  /// 안전영역 안쪽에서 게임 요소를 배치할 좌우 기준선.
+  double get safeContentLeft => safeAreaPadding.left + size.x * 0.03;
+
+  double get safeContentRight => size.x - safeAreaPadding.right - size.x * 0.03;
+
+  double get safeContentWidth =>
+      (safeContentRight - safeContentLeft).clamp(0.0, double.infinity);
+
+  double get safeContentCenterX => safeContentLeft + safeContentWidth / 2;
+
   /// 타임 패널 중심 Y.
-  double get panelCenterY => safeAreaTop + _gap + _panelH / 2;
+  double get panelCenterY => safeAreaPadding.top + _gap + _panelH / 2;
 
   /// 힌트 말풍선 중심 Y. (패널 아래 gap + 힌트 행 절반)
-  double get hintCenterY => safeAreaTop + 2 * _gap + _panelH + _hintR;
+  double get hintCenterY =>
+      safeAreaPadding.top + 2 * _gap + _panelH + _hintR;
 
   /// 그리드 상단 Y. (HUD 아래 gap 후 그리드)
   double get gridTopY =>
-      safeAreaTop + _gap + _panelH + _gap + _hintRowH + _gap;
+      safeAreaPadding.top + _gap + _panelH + _gap + _hintRowH + _gap;
 
   /// 레이아웃 기준. 상단 HUD 고정 후 남은 공간에 그리드 크기 결정.
   double get layoutRef {
-    final availW = size.x - size.x * 0.06;
-    final maxGridH = (size.y - gridTopY - _gap).clamp(0.0, double.infinity);
+    final availW = safeContentWidth;
+    final maxGridH = (size.y - safeAreaPadding.bottom - gridTopY - _gap)
+        .clamp(0.0, double.infinity);
     return availW < maxGridH ? availW : maxGridH;
   }
 
@@ -275,7 +287,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
     final spacing = cubeSize * spacingRatio;
     final step = cubeSize + spacing;
     final gridWidth = colNum * cubeSize + (colNum + 1) * spacing;
-    final contentLeft = (size.x - gridWidth) / 2;
+    final contentLeft = safeContentLeft + (safeContentWidth - gridWidth) / 2;
     final gridLeft = contentLeft + spacing;
 
     final bgPadding = spacing * 0.5;
@@ -313,7 +325,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
     final spacing = cubeSize * spacingRatio;
     final step = cubeSize + spacing;
     final gridWidth = colNum * cubeSize + (colNum + 1) * spacing;
-    final contentLeft = (size.x - gridWidth) / 2;
+    final contentLeft = safeContentLeft + (safeContentWidth - gridWidth) / 2;
     final gridLeft = contentLeft + spacing;
 
     final bgPadding = spacing * 0.5;

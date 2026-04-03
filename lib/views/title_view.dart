@@ -59,112 +59,113 @@ class _TitleViewState extends State<TitleView>
       body: Stack(
         children: [
           const _StarryBackground(),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
+          Positioned.fill(
             child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                child: FutureBuilder<PackageInfo>(
-                  future: PackageInfo.fromPlatform(),
-                  builder: (context, snapshot) {
-                    final v = snapshot.data;
-                    final text = v != null
-                        ? 'Ver ${v.version}+${v.buildNumber}'
-                        : 'Ver';
-                    return Center(
-                      child: Text(
-                        text,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: 12,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Center(
-              child: Column(
+              child: Stack(
                 children: [
-                  const Spacer(flex: 3),
-                  Text(
-                    context.tr('gameTitle'),
-                    style: TextStyle(
-                      fontFamily: AssetPaths.fontAngduIpsul140,
-                      fontSize: 64,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white.withValues(alpha: 0.9),
-                      letterSpacing: 8,
-                    ),
-                  ),
-                  Text(
-                    AppConfig.gameTitleSub,
-                    style: TextStyle(
-                      fontFamily: AssetPaths.fontAngduIpsul140,
-                      fontSize: 88,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFFFFD54F),
-                      letterSpacing: 6,
-                      shadows: [
-                        Shadow(
-                          color: const Color(0xFFFFD54F).withValues(alpha: 0.5),
-                          blurRadius: 24,
+                  Center(
+                    child: Column(
+                      children: [
+                        const Spacer(flex: 3),
+                        Text(
+                          context.tr('gameTitle'),
+                          style: TextStyle(
+                            fontFamily: AssetPaths.fontAngduIpsul140,
+                            fontSize: 64,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white.withValues(alpha: 0.9),
+                            letterSpacing: 8,
+                          ),
                         ),
-                        const Shadow(
-                          color: Color(0xFFE65100),
-                          offset: Offset(2, 2),
-                          blurRadius: 0,
+                        Text(
+                          AppConfig.gameTitleSub,
+                          style: TextStyle(
+                            fontFamily: AssetPaths.fontAngduIpsul140,
+                            fontSize: 88,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFFFFD54F),
+                            letterSpacing: 6,
+                            shadows: [
+                              Shadow(
+                                color: const Color(0xFFFFD54F).withValues(alpha: 0.5),
+                                blurRadius: 24,
+                              ),
+                              const Shadow(
+                                color: Color(0xFFE65100),
+                                offset: Offset(2, 2),
+                                blurRadius: 0,
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.tr('gameSubtitle'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: AssetPaths.fontAngduIpsul140,
+                            fontSize: 22,
+                            color: Colors.white.withValues(alpha: 0.6),
+                          ),
+                        ),
+                        const Spacer(flex: 3),
+                        _RoundButton(
+                          label: context.tr('modeNumber'),
+                          color: const Color(0xFF3CAEE0),
+                          onPressed: () {
+                            SoundManager.unlockForWeb();
+                            SoundManager.playSfx(AssetPaths.sfxBtnSnd);
+                            context.go('${RoutePaths.game}?mode=0');
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        _RoundButton(
+                          label: context.tr('modeAlphabet'),
+                          color: const Color(0xFF2DB872),
+                          onPressed: () {
+                            SoundManager.unlockForWeb();
+                            SoundManager.playSfx(AssetPaths.sfxBtnSnd);
+                            context.go('${RoutePaths.game}?mode=1');
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        _RoundButton(
+                          label: context.tr('settings'),
+                          color: const Color(0xFF1976D2),
+                          onPressed: () {
+                            SoundManager.unlockForWeb();
+                            SoundManager.playSfx(AssetPaths.sfxBtnSnd);
+                            context.push(RoutePaths.setting);
+                          },
+                        ),
+                        const Spacer(flex: 2),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.tr('gameSubtitle'),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: AssetPaths.fontAngduIpsul140,
-                      fontSize: 22,
-                      color: Colors.white.withValues(alpha: 0.6),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                      child: FutureBuilder<PackageInfo>(
+                        future: PackageInfo.fromPlatform(),
+                        builder: (context, snapshot) {
+                          final v = snapshot.data;
+                          final text = v != null
+                              ? 'Ver ${v.version}+${v.buildNumber}'
+                              : 'Ver';
+                          return Center(
+                            child: Text(
+                              text,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                fontSize: 12,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                  const Spacer(flex: 3),
-                  _RoundButton(
-                    label: context.tr('modeNumber'),
-                    color: const Color(0xFF3CAEE0),
-                    onPressed: () {
-                      SoundManager.unlockForWeb();
-                      SoundManager.playSfx(AssetPaths.sfxBtnSnd);
-                      context.go('${RoutePaths.game}?mode=0');
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  _RoundButton(
-                    label: context.tr('modeAlphabet'),
-                    color: const Color(0xFF2DB872),
-                    onPressed: () {
-                      SoundManager.unlockForWeb();
-                      SoundManager.playSfx(AssetPaths.sfxBtnSnd);
-                      context.go('${RoutePaths.game}?mode=1');
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  _RoundButton(
-                    label: context.tr('settings'),
-                    color: const Color(0xFF1976D2),
-                    onPressed: () {
-                      SoundManager.unlockForWeb();
-                      SoundManager.playSfx(AssetPaths.sfxBtnSnd);
-                      context.push(RoutePaths.setting);
-                    },
-                  ),
-                  const Spacer(flex: 2),
                 ],
               ),
             ),

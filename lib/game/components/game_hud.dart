@@ -10,9 +10,7 @@ import '../one_to_fifty_game.dart';
 /// 게임 상단 HUD. 타임 패널과 힌트 말풍선을 직접 렌더링한다.
 class GameHud extends PositionComponent
     with HasGameReference<OneToFiftyGame> {
-  GameHud({this.safeAreaTop = 0});
-
-  final double safeAreaTop;
+  GameHud();
 
   String _timeStr = '0.00';
   String _hintStr = '1';
@@ -66,21 +64,18 @@ class GameHud extends PositionComponent
   static const double _kBtnSizeFactor = 0.5;
 
   void _layoutHud() {
-    final s = game.size;
-    final ref = game.layoutRef;
-    final contentLeft = (s.x - ref) / 2;
     final scale = game.hudScale;
     priority = 10;
 
     // 타임 패널: 비율로 계산 (아이패드에서도 적절한 크기)
     _panelW = scale * _kPanelWFactor;
     _panelH = game.panelH;
-    _panelCx = s.x / 2;
+    _panelCx = game.safeContentCenterX;
     _panelCy = game.panelCenterY;
 
     // 힌트 말풍선: 비율로 계산
     _hintR = game.hintR;
-    _hintCx = contentLeft + ref - _hintR - 8;
+    _hintCx = game.safeContentRight - _hintR - 8;
     _hintCy = game.hintCenterY;
 
     _buildTimePainters();
@@ -90,8 +85,11 @@ class GameHud extends PositionComponent
     final btnSize = scale * _kBtnSizeFactor;
     _pauseButton
       ..size = Vector2.all(btnSize)
-      ..position = Vector2(contentLeft + 12, game.hintCenterY - btnSize / 2);
-    final pauseRight = contentLeft + 12 + btnSize;
+      ..position = Vector2(
+        game.safeContentLeft + 12,
+        game.hintCenterY - btnSize / 2,
+      );
+    final pauseRight = game.safeContentLeft + 12 + btnSize;
     final hintLeft = _hintCx - _hintR;
     final gap = hintLeft - pauseRight;
     _showBestScore = gap > scale * 0.8;
@@ -271,6 +269,7 @@ class GameHud extends PositionComponent
 
   /// 상단 중앙의 갈색 타임 패널을 그린다.
   void _renderTimePanel(Canvas canvas) {
+    final panelScale = _panelH / 110;
     final rect = RRect.fromRectAndRadius(
       Rect.fromCenter(
         center: Offset(_panelCx, _panelCy),
@@ -291,11 +290,11 @@ class GameHud extends PositionComponent
     final borderPaint = Paint()
       ..color = const Color(0xFF6B4E37)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = 2 * panelScale;
     canvas.drawRRect(rect, borderPaint);
 
     // time score 라벨: 패널 상단 중앙.
-    const labelTopPadding = 8.0;
+    final labelTopPadding = 8.0 * panelScale;
     _timeLabelPainter.paint(
       canvas,
       Offset(
@@ -306,8 +305,8 @@ class GameHud extends PositionComponent
 
     // 타임 숫자: 고정폭 부모 + 왼쪽 정렬로 털림 방지.
     // 부모는 패널 중앙, 짧은 텍스트(00.00)가 중앙에 오도록 padding → 길어지면 오른쪽으로 확장.
-    const timeParentWidth = 200.0;
-    const timeBottomPadding = 12.0;
+    final timeParentWidth = _panelW * 0.72;
+    final timeBottomPadding = 12.0 * panelScale;
     final parentLeft = _panelCx - timeParentWidth / 2;
     final padding = (timeParentWidth - _timeRefWidth) / 2;
     final timeX = parentLeft + padding;
