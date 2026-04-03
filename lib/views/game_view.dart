@@ -47,9 +47,8 @@ class _GameViewState extends State<GameView> {
         'Countdown': _buildCountdown,
         'PauseMenu': _buildPauseMenu,
         'Clear': _buildClearScreen,
-        'PauseButton': _buildPauseButton,
       },
-      initialActiveOverlays: const ['Countdown', 'PauseButton'],
+      initialActiveOverlays: const ['Countdown'],
     );
 
     if (kIsWeb) {
@@ -95,42 +94,6 @@ class _GameViewState extends State<GameView> {
     return _PauseMenuOverlay(game: game);
   }
 
-  /// 일시정지 버튼 오버레이. Flutter 위젯으로 렌더 → 웹 리사이즈 시 문제 없음.
-  Widget _buildPauseButton(BuildContext context, OneToFiftyGame game) {
-    game.setLocaleStrings({
-      'timeScore': context.tr('timeScore'),
-      'hint': context.tr('hint'),
-      'bestScore': context.tr('bestScore'),
-    });
-    return ListenableBuilder(
-      listenable: game.resizeNotifier,
-      builder: (context, _) {
-        final ref = game.layoutRef;
-        final scale = game.hudScale;
-        final contentLeft = (game.size.x - ref) / 2;
-        final btnSize = scale * 0.5;
-        final btnY = game.hintCenterY - btnSize / 2;
-
-        return Stack(
-          children: [
-            Positioned.fill(child: IgnorePointer(child: SizedBox.shrink())),
-            Positioned(
-              left: contentLeft + 12,
-              top: btnY,
-              child: GestureDetector(
-                onTap: () {
-                  SoundManager.unlockForWeb();
-                  game.pauseGame();
-                },
-                child: _PauseButtonWidget(size: btnSize),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   /// 게임 클리어 오버레이: Clear! 텍스트, 결과 시간, 다시하기·나가기 버튼.
   /// 첫 클리어 시 인앱 리뷰 팝업 요청.
   Widget _buildClearScreen(BuildContext context, OneToFiftyGame game) {
@@ -159,138 +122,141 @@ class _ClearScreenOverlayState extends State<_ClearScreenOverlay> {
   @override
   Widget build(BuildContext context) {
     final game = widget.game;
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24),
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 36),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.amber.withValues(alpha: 0.5), width: 3),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.6),
-              blurRadius: 24,
-              spreadRadius: 4,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 20,
-          children: [
-            Text(
-              context.tr('clear'),
-              style: TextStyle(
-                fontFamily: AssetPaths.fontAngduIpsul140,
-                color: Colors.amber,
-                fontSize: 64,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(color: Colors.black45, offset: Offset(2, 2), blurRadius: 4),
-                ],
+    return ColoredBox(
+      color: Colors.black54,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 36),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.amber.withValues(alpha: 0.5), width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.6),
+                blurRadius: 24,
+                spreadRadius: 4,
               ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  context.tr('gameResult'),
-                  style: TextStyle(
-                    fontFamily: AssetPaths.fontAngduIpsul140,
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  game.formattedTime,
-                  style: const TextStyle(
-                    fontFamily: AssetPaths.fontAngduIpsul140,
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            if (game.formattedBestScore != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      context.tr('bestScore'),
-                      style: TextStyle(
-                        fontFamily: AssetPaths.fontAngduIpsul140,
-                        color: Colors.amber,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      game.formattedBestScore!,
-                      style: const TextStyle(
-                        fontFamily: AssetPaths.fontAngduIpsul140,
-                        color: Colors.amber,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 20,
+            children: [
+              Text(
+                context.tr('clear'),
+                style: TextStyle(
+                  fontFamily: AssetPaths.fontAngduIpsul140,
+                  color: Colors.amber,
+                  fontSize: 64,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(color: Colors.black45, offset: Offset(2, 2), blurRadius: 4),
                   ],
                 ),
               ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: 240,
-              height: 56,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(
-                    fontFamily: AssetPaths.fontAngduIpsul140,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.tr('gameResult'),
+                    style: TextStyle(
+                      fontFamily: AssetPaths.fontAngduIpsul140,
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
+                  Text(
+                    game.formattedTime,
+                    style: const TextStyle(
+                      fontFamily: AssetPaths.fontAngduIpsul140,
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              if (game.formattedBestScore != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        context.tr('bestScore'),
+                        style: TextStyle(
+                          fontFamily: AssetPaths.fontAngduIpsul140,
+                          color: Colors.amber,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        game.formattedBestScore!,
+                        style: const TextStyle(
+                          fontFamily: AssetPaths.fontAngduIpsul140,
+                          color: Colors.amber,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                onPressed: () {
-                  SoundManager.unlockForWeb();
-                  SoundManager.playSfx(AssetPaths.sfxBtnSnd);
-                  game.overlays.remove('Clear');
-                  game.prepareAndCountdown();
-                },
-                child: Text(context.tr('retry')),
-              ),
-            ),
-            SizedBox(
-              width: 240,
-              height: 56,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.redAccent,
-                  textStyle: const TextStyle(
-                    fontFamily: AssetPaths.fontAngduIpsul140,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+              const SizedBox(height: 8),
+              SizedBox(
+                width: 240,
+                height: 56,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    textStyle: const TextStyle(
+                      fontFamily: AssetPaths.fontAngduIpsul140,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
+                  onPressed: () {
+                    SoundManager.unlockForWeb();
+                    SoundManager.playSfx(AssetPaths.sfxBtnSnd);
+                    game.overlays.remove('Clear');
+                    game.prepareAndCountdown();
+                  },
+                  child: Text(context.tr('retry')),
                 ),
-                onPressed: () {
-                  SoundManager.unlockForWeb();
-                  SoundManager.playSfx(AssetPaths.sfxBtnSnd);
-                  context.go(RoutePaths.title);
-                },
-                child: Text(context.tr('exit')),
               ),
-            ),
-          ],
+              SizedBox(
+                width: 240,
+                height: 56,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.redAccent,
+                    textStyle: const TextStyle(
+                      fontFamily: AssetPaths.fontAngduIpsul140,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  onPressed: () {
+                    SoundManager.unlockForWeb();
+                    SoundManager.playSfx(AssetPaths.sfxBtnSnd);
+                    context.go(RoutePaths.title);
+                  },
+                  child: Text(context.tr('exit')),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -329,202 +295,204 @@ class _PauseMenuOverlayState extends State<_PauseMenuOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white24, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.6),
-                blurRadius: 24,
-                spreadRadius: 4,
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                context.tr('paused'),
-                style: TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  color: Colors.white,
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black45,
-                      offset: Offset(2, 2),
-                      blurRadius: 4,
+    return ColoredBox(
+      color: Colors.black54,
+      child: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white24, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  blurRadius: 24,
+                  spreadRadius: 4,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.tr('paused'),
+                  style: TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    color: Colors.white,
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black45,
+                        offset: Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  context.tr('bgm'),
+                  style: TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    fontSize: 20,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 12,
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
+                          trackShape: const RoundedRectSliderTrackShape(),
+                        ),
+                        child: Slider(
+                          value: _bgmMuted ? 0.0 : _bgmVolume,
+                          onChanged: _bgmMuted
+                              ? null
+                              : (v) {
+                                  setState(() {
+                                    _bgmVolume = v;
+                                    GameSettings.bgmVolume = v;
+                                    SoundManager.applyBgmVolume();
+                                  });
+                                },
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _bgmMuted ? Icons.volume_off : Icons.volume_up,
+                      color: Colors.white70,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 4),
+                    Switch(
+                      value: _bgmMuted,
+                      onChanged: (v) {
+                        setState(() {
+                          _bgmMuted = v;
+                          GameSettings.bgmMuted = v;
+                          if (v) {
+                            SoundManager.pauseBgm();
+                          } else {
+                            SoundManager.playBgmIfUnmuted();
+                          }
+                        });
+                      },
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                context.tr('bgm'),
-                style: TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  fontSize: 20,
-                  color: Colors.white70,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 12,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
-                        trackShape: const RoundedRectSliderTrackShape(),
-                      ),
-                      child: Slider(
-                        value: _bgmMuted ? 0.0 : _bgmVolume,
-                        onChanged: _bgmMuted
-                            ? null
-                            : (v) {
-                                setState(() {
-                                  _bgmVolume = v;
-                                  GameSettings.bgmVolume = v;
-                                  SoundManager.applyBgmVolume();
-                                });
-                              },
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    _bgmMuted ? Icons.volume_off : Icons.volume_up,
+                const SizedBox(height: 24),
+                Text(
+                  context.tr('sfx'),
+                  style: TextStyle(
+                    fontFamily: AssetPaths.fontAngduIpsul140,
+                    fontSize: 20,
                     color: Colors.white70,
-                    size: 24,
                   ),
-                  const SizedBox(width: 4),
-                  Switch(
-                    value: _bgmMuted,
-                    onChanged: (v) {
-                      setState(() {
-                        _bgmMuted = v;
-                        GameSettings.bgmMuted = v;
-                        if (v) {
-                          SoundManager.pauseBgm();
-                        } else {
-                          SoundManager.playBgmIfUnmuted();
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Text(
-                context.tr('sfx'),
-                style: TextStyle(
-                  fontFamily: AssetPaths.fontAngduIpsul140,
-                  fontSize: 20,
-                  color: Colors.white70,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 12,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
-                        trackShape: const RoundedRectSliderTrackShape(),
-                      ),
-                      child: Slider(
-                        value: _sfxMuted ? 0.0 : _sfxVolume,
-                        onChanged: _sfxMuted
-                            ? null
-                            : (v) {
-                                setState(() {
-                                  _sfxVolume = v;
-                                  GameSettings.sfxVolume = v;
-                                });
-                              },
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 12,
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
+                          trackShape: const RoundedRectSliderTrackShape(),
+                        ),
+                        child: Slider(
+                          value: _sfxMuted ? 0.0 : _sfxVolume,
+                          onChanged: _sfxMuted
+                              ? null
+                              : (v) {
+                                  setState(() {
+                                    _sfxVolume = v;
+                                    GameSettings.sfxVolume = v;
+                                  });
+                                },
+                        ),
                       ),
                     ),
-                  ),
-                  Icon(
-                    _sfxMuted ? Icons.volume_off : Icons.volume_up,
-                    color: Colors.white70,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 4),
-                  Switch(
-                    value: _sfxMuted,
-                    onChanged: (v) {
-                      setState(() {
-                        _sfxMuted = v;
-                        GameSettings.sfxMuted = v;
-                      });
+                    Icon(
+                      _sfxMuted ? Icons.volume_off : Icons.volume_up,
+                      color: Colors.white70,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 4),
+                    Switch(
+                      value: _sfxMuted,
+                      onChanged: (v) {
+                        setState(() {
+                          _sfxMuted = v;
+                          GameSettings.sfxMuted = v;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: 220,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      textStyle: const TextStyle(
+                        fontFamily: AssetPaths.fontAngduIpsul140,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                    ),
+                    onPressed: () {
+                      SoundManager.unlockForWeb();
+                      SoundManager.playSfx(AssetPaths.sfxBtnSnd);
+                      SoundManager.resumeBgm(onlyIfCurrent: AssetPaths.bgmMain);
+                      widget.game.resumeEngine();
+                      widget.game.overlays.remove('PauseMenu');
+                      widget.game.isPlaying = true;
                     },
+                    child: Text(context.tr('continueGame')),
                   ),
-                ],
-              ),
-              const SizedBox(height: 28),
-              SizedBox(
-                width: 220,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    textStyle: const TextStyle(
-                      fontFamily: AssetPaths.fontAngduIpsul140,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26),
-                    ),
-                  ),
-                  onPressed: () {
-                    SoundManager.unlockForWeb();
-                    SoundManager.playSfx(AssetPaths.sfxBtnSnd);
-                    SoundManager.resumeBgm(onlyIfCurrent: AssetPaths.bgmMain);
-                    widget.game.resumeEngine();
-                    widget.game.overlays.remove('PauseMenu');
-                    widget.game.overlays.add('PauseButton');
-                    widget.game.isPlaying = true;
-                  },
-                  child: Text(context.tr('continueGame')),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: 220,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.redAccent,
-                    textStyle: const TextStyle(
-                      fontFamily: AssetPaths.fontAngduIpsul140,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 220,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.redAccent,
+                      textStyle: const TextStyle(
+                        fontFamily: AssetPaths.fontAngduIpsul140,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26),
-                    ),
+                    onPressed: () {
+                      SoundManager.unlockForWeb();
+                      SoundManager.playSfx(AssetPaths.sfxBtnSnd);
+                      context.go(RoutePaths.title);
+                    },
+                    child: Text(context.tr('exit')),
                   ),
-                  onPressed: () {
-                    SoundManager.unlockForWeb();
-                    SoundManager.playSfx(AssetPaths.sfxBtnSnd);
-                    context.go(RoutePaths.title);
-                  },
-                  child: Text(context.tr('exit')),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -640,74 +608,4 @@ class _CountdownOverlayState extends State<_CountdownOverlay>
       ),
     );
   }
-}
-
-/// 일시정지 버튼 Flutter 위젯. HUD _PauseButton과 동일한 모양.
-class _PauseButtonWidget extends StatelessWidget {
-  const _PauseButtonWidget({required this.size});
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _PauseButtonPainter(size: size),
-      ),
-    );
-  }
-}
-
-class _PauseButtonPainter extends CustomPainter {
-  _PauseButtonPainter({required this.size});
-  final double size;
-
-  @override
-  void paint(Canvas canvas, Size canvasSize) {
-    final r = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size, size),
-      Radius.circular(size * 0.25),
-    );
-    canvas.drawRRect(
-      r,
-      Paint()..color = Colors.white.withValues(alpha: 0.15),
-    );
-
-    final barW = size * 0.14;
-    final barH = size * 0.45;
-    final gap = size * 0.12;
-    final cx = size / 2;
-    final cy = size / 2;
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.85)
-      ..style = PaintingStyle.fill;
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: Offset(cx - gap, cy),
-          width: barW,
-          height: barH,
-        ),
-        Radius.circular(barW * 0.3),
-      ),
-      paint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: Offset(cx + gap, cy),
-          width: barW,
-          height: barH,
-        ),
-        Radius.circular(barW * 0.3),
-      ),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _PauseButtonPainter oldDelegate) =>
-      oldDelegate.size != size;
 }

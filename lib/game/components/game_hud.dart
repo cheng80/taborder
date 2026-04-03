@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 
 import '../../resources/asset_paths.dart';
@@ -37,13 +38,14 @@ class GameHud extends PositionComponent
   late double _bestScoreCy;
   bool _showBestScore = false;
   String? _cachedBestScoreStr;
-
-  /// 일시정지 버튼은 Flutter 오버레이(PauseButton)로 렌더 → 웹 리사이즈 시 문제 없음.
+  late _PauseButton _pauseButton;
 
   /// HUD 레이아웃 계산 및 타임/힌트 페인터 초기화.
   /// layoutRef 기준으로 스케일해 가로가 긴 웹 화면에서 과도한 확대 방지.
   @override
   Future<void> onLoad() async {
+    _pauseButton = _PauseButton(onPressed: game.pauseGame);
+    add(_pauseButton);
     _layoutHud();
   }
 
@@ -86,6 +88,9 @@ class GameHud extends PositionComponent
 
     // Best score: Pause-Hint 사이 (비율에 맞춰 표시 여부)
     final btnSize = scale * _kBtnSizeFactor;
+    _pauseButton
+      ..size = Vector2.all(btnSize)
+      ..position = Vector2(contentLeft + 12, game.hintCenterY - btnSize / 2);
     final pauseRight = contentLeft + 12 + btnSize;
     final hintLeft = _hintCx - _hintR;
     final gap = hintLeft - pauseRight;
@@ -346,6 +351,61 @@ class GameHud extends PositionComponent
         _hintCx - _hintValuePainter.width / 2,
         _hintCy - _hintValuePainter.height / 2 + 6,
       ),
+    );
+  }
+}
+
+class _PauseButton extends PositionComponent with TapCallbacks {
+  _PauseButton({required this.onPressed}) : super(anchor: Anchor.topLeft);
+
+  final VoidCallback onPressed;
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    onPressed();
+  }
+
+  @override
+  void render(Canvas canvas) {
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      Radius.circular(size.x * 0.25),
+    );
+    canvas.drawRRect(
+      rect,
+      Paint()..color = Colors.white.withValues(alpha: 0.15),
+    );
+
+    final barW = size.x * 0.14;
+    final barH = size.x * 0.45;
+    final gap = size.x * 0.12;
+    final cx = size.x / 2;
+    final cy = size.y / 2;
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.85)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(cx - gap, cy),
+          width: barW,
+          height: barH,
+        ),
+        Radius.circular(barW * 0.3),
+      ),
+      paint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(cx + gap, cy),
+          width: barW,
+          height: barH,
+        ),
+        Radius.circular(barW * 0.3),
+      ),
+      paint,
     );
   }
 }

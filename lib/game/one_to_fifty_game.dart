@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -44,10 +45,6 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
   double _elapsedTime = 0;
   double _hintTimer = 0;
   static const double hintDelay = 5.0;
-
-  /// 리사이즈 시 오버레이 재빌드용. onGameResize에서 value 갱신.
-  final ValueNotifier<int> _resizeTick = ValueNotifier(0);
-  Listenable get resizeNotifier => _resizeTick;
 
   /// 다국어 문자열. 오버레이 빌드 시 context에서 주입.
   Map<String, String> _localeStrings = {};
@@ -144,15 +141,18 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
     _initLabels();
+    camera.viewfinder
+      ..anchor = Anchor.topLeft
+      ..position = Vector2.zero();
 
-    add(SpaceBg());
+    camera.backdrop.add(SpaceBg());
 
     _hud = GameHud(safeAreaTop: safeAreaTop);
-    add(_hud!);
+    camera.viewport.add(_hud!);
 
     _prepareGrid();
     overlays.remove('Countdown');
-    overlays.add('Countdown', priority: 1); // HUD·PauseButton 위에 카운트다운 표시
+    overlays.add('Countdown', priority: 1); // HUD 위에 카운트다운 표시
   }
 
   /// gameMode에 따라 labels와 totalCount를 설정한다. 0=숫자(1~50), 1=알파벳(A~Z).
@@ -197,8 +197,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
   /// 다시하기 시: 그리드를 새로 배치하고 카운트다운을 띄운다.
   void prepareAndCountdown() {
     _prepareGrid();
-    overlays.add('PauseButton');
-    overlays.add('Countdown', priority: 1); // HUD·PauseButton 위에 카운트다운 표시
+    overlays.add('Countdown', priority: 1); // HUD 위에 카운트다운 표시
   }
 
   /// 카운트다운 완료 후 호출. 게임 플레이를 시작한다.
@@ -213,7 +212,6 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
     // 사용자가 직접 일시정지를 누른 경우에는 현재 BGM을 항상 멈춘다.
     SoundManager.pauseBgm();
     pauseEngine();
-    overlays.remove('PauseButton');
     overlays.add('PauseMenu');
   }
 
@@ -264,7 +262,6 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
     _updateGridLayout();
-    _resizeTick.value++;
   }
 
   /// 그리드 레이아웃만 갱신. 게임 상태(숫자 배치)는 유지.
@@ -329,7 +326,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
       position: Vector2(contentLeft - bgPadding, bgTop),
       size: Vector2(bgWidth, bgHeight),
     )..priority = 0;
-    add(_gridBg!);
+    world.add(_gridBg!);
 
     for (var i = 0; i < firstTableNum; i++) {
       final row = i ~/ colNum; // 0~4
@@ -352,7 +349,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
         gridIndex: i,
       );
       _cubes.add(cube);
-      add(cube);
+      world.add(cube);
     }
 
     _gridCubeSize = cubeSize;
@@ -377,7 +374,6 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
         GameSettings.saveBestScoreIfBetter(gameMode, _elapsedTime);
         cube.animateCorrect(() {
           SoundManager.playSfx(AssetPaths.sfxClear);
-          overlays.remove('PauseButton');
           overlays.add('Clear');
         });
       } else {
@@ -402,7 +398,7 @@ class OneToFiftyGame extends FlameGame with TapCallbacks {
               gridIndex: cube.gridIndex,
             );
             _cubes.add(newCube);
-            add(newCube);
+            world.add(newCube);
             newCube.animateFadeIn();
           }
         });
